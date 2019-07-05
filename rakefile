@@ -1,0 +1,83 @@
+require 'tenma_control'
+require 'serialport'
+
+include TenmaControl
+
+if ENV['PORT']
+  DEV = ENV['PORT']
+else
+  DEV = '/dev/ttyACM1'
+end
+
+task :vsweep do
+
+  PSU.open(DEV) do |psu|
+  
+    (0..3000).each do |v|
+      puts "setting #{v/100.0}"
+      psu.set_voltage(v/100.0)    
+    end
+
+  end
+    
+end
+
+task :idn do
+
+  PSU.open(DEV) do |psu|
+  
+    puts psu.get_idn
+    
+  end
+  
+end
+
+task :beep_on do
+
+  PSU.open(DEV) do |psu|
+  
+    psu.enable_beep
+  
+  end
+  
+end
+
+task :beep_off do
+
+  PSU.open(DEV) do |psu|
+
+    psu.disable_beep
+  
+  end
+  
+end
+
+task :output_on do
+
+  PSU.open(DEV) do |psu|
+
+    psu.enable_output
+  
+  end
+  
+end
+
+task :output_off do
+
+  PSU.open(DEV) do |psu|
+    
+    psu.disable_output
+  
+  end
+  
+end
+
+task :status do
+
+  PSU.open(DEV) do |psu|
+  
+    puts psu.get_status
+  
+  end
+  
+end
