@@ -1,5 +1,4 @@
 require 'tenma_control'
-require 'serialport'
 
 include TenmaControl
 
