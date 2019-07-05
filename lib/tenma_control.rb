@@ -1,3 +1,4 @@
+require 'serialport'
 require 'tenma_control/version'
 
 module TenmaControl
@@ -25,13 +26,52 @@ module TenmaControl
     
     private :write, :read
 
-    def initialize(port, **opts)      
-      @port = port
-      @timeout = TIMEOUT||opts[:timeout].to_i
-      @port.read_timeout = @timeout            
+    # Create an instance of PSU and yield to a block
+    #
+    # @note will close serial port after block 
+    #
+    # @param dev [String] device string
+    # @param opts [Hash]
+    #
+    # @option opts [Integer] :baud override default (9600) baud 
+    # @option opts [Integer] :timeout override default (100ms) interfame timeout (in milliseconds)
+    #
+    # @return [PSU]
+    #
+    def self.open(dev, **opts)
+      obj = self.new(dev, **opts)
+      yield(obj) if block_given?
+      obj.close
+      obj
     end
 
-    # Set current limit.
+    # Create an instance of PSU
+    # 
+    # @param dev [String] device string
+    # @param opts [Hash]
+    #
+    # @option opts [Integer] :baud override default (9600) baud 
+    # @option opts [Integer] :timeout override default (100ms) interfame timeout (in milliseconds)
+    #
+    def initialize(dev, **opts)      
+      @dev = dev
+      @port = nil
+      @timeout = TIMEOUT||opts[:timeout].to_i
+      @port.read_timeout = @timeout            
+      open()
+    end
+    
+    # (re-)open the serial port
+    def open
+      @port = SerialPort.new(@dev, @baud)
+    end
+    
+    # close the serial port
+    def close
+      @port.close
+    end
+
+    # Set current limit
     # 
     # @warning this command does not confirm the setting has been applied
     #
